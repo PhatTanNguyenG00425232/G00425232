@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { getStudents,  updateStudent, addStudent } = require('./db'); // Import DAO functions
+const { getStudents,  updateStudent, addStudent, getGrades } = require('./db'); // Import DAO functions
 
 const app = express();
 const PORT = 3004;
@@ -100,6 +100,19 @@ app.post('/students/add', (req, res) => {
       res.render('addStudent', { errors: [error.message], sid, name, age });
     });
 });
+// Students Route (MySQL)
+app.get('/grades', (req, res) => {
+  getGrades() // Call the DAO function to fetch grades
+    .then((grades) => {
+      // Render the "grades" EJS view, passing the "grade" data
+      res.render('grades', { grades });
+    })
+    .catch((error) => {
+      console.error('Error fetching grades:', error.message);
+      res.status(500).send('Error fetching grades: ' + error.message);
+    });
+});
+
 
 // Start the server
 app.listen(PORT, () => {

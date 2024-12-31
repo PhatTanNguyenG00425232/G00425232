@@ -1,3 +1,4 @@
+const { get } = require('mongoose');
 const pmysql = require('promise-mysql');
 const MongoClient = require('mongodb').MongoClient;
 
@@ -62,10 +63,36 @@ const addStudent = function (sid, name, age) {
         });
     });
   };
-
+// MYSQL Function: Get grade for grade site
+const getGrades = function () {
+    return new Promise((resolve, reject) => {
+      if (!pool) return reject(new Error('MySQL pool not initialized'));
+      //mysql query
+      const query = `
+        SELECT 
+          student.name AS studentName,
+          module.name AS moduleName,
+          grade.grade AS studentGrade
+        FROM student
+        LEFT JOIN grade ON student.sid = grade.sid
+        LEFT JOIN module ON grade.mid = module.mid
+        ORDER BY student.name ASC, grade.grade ASC
+      `;
+  
+      pool.query(query)
+        .then((data) => {
+          resolve(data);
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+  };
+  
 // Export functions
 module.exports = {
   getStudents,
   updateStudent,
    addStudent,
+   getGrades
 };
