@@ -1,0 +1,24 @@
+
+<body>
+  <h1>Students</h1>
+  <a href="/students/add">Add Student</a>
+    <a href="/">Home</a>
+  <table border="1">
+    <tr>
+      <th>Student ID</th>
+      <th>Name</th>
+      <th>Age</th>
+      <th>Action</th>
+    </tr>
+    <% students.forEach(student => { %>
+      <tr>
+        <td><%= student.sid %></td>
+        <td><%= student.name %></td>
+        <td><%= student.age %></td>
+        <td><a href="/students/edit/<%= student.sid %>">Update</a></td>
+      </tr>
+    <% }); %>
+  </table>
+ 
+</body>
+
