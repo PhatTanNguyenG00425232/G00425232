@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { getStudents,  updateStudent, addStudent, getGrades } = require('./db'); // Import DAO functions
+const { getStudents,  updateStudent, addStudent, getGrades, findAllLecturers, deleteLecturer } = require('./db'); 
 
 const app = express();
 const PORT = 3004;
@@ -110,6 +110,33 @@ app.get('/grades', (req, res) => {
     .catch((error) => {
       console.error('Error fetching grades:', error.message);
       res.status(500).send('Error fetching grades: ' + error.message);
+    });
+});
+// Lecturers Route (MongoDB)
+app.get('/lecturers', (req, res) => {
+  findAllLecturers()
+    .then((lecturers) => {
+      res.render('lecturers', { lecturers });
+    })
+    .catch((error) => {
+      console.error('Error fetching lecturers:', error.message);
+      res.status(500).send('Error fetching lecturers: ' + error.message);
+    });
+});
+//route to lecturers base on their ID
+app.get('/lecturers/delete/:lid', (req, res) => {
+  const { lid } = req.params;
+
+  deleteLecturer(lid)
+    .then(() => {
+      res.redirect('/lecturers'); // Redirect to the lecturers page
+    })
+    .catch((error) => {
+      res.status(400).send(`
+        <h1>Error Message</h1>
+        <p>Cannot delete lecturer ${lid}. He/She has associated modules.</p>
+        <a href="/lecturers">Back to Lecturers</a>
+      `);
     });
 });
 

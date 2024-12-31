@@ -88,11 +88,76 @@ const getGrades = function () {
         });
     });
   };
-  
+
+
+// MongoDB Setup
+MongoClient.connect('mongodb://127.0.0.1:27017')
+  .then((client) => {
+    const db = client.db('usersdb'); 
+    coll = db.collection('users2');
+    console.log('Connected to MongoDB');
+  })
+  .catch((error) => {
+    console.log('MongoDB connection error:', error.message);
+  });
+
+
+// MongoDB Function: Find All Lecturers
+const findAllLecturers = function () {
+  return new Promise((resolve, reject) => {
+    if (!coll) return reject(new Error('MongoDB collection not initialized'));
+    const cursor = coll.find(); // Fetch all documents
+    cursor.toArray()
+      .then((documents) => {
+        resolve(documents);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
+const deleteLecturer = function (lid) {
+  return new Promise((resolve, reject) => {
+    if (!pool) return reject(new Error('MySQL pool not initialized'));
+
+    // Check if the lecturer is associated with any module
+    const checkQuery = `
+      SELECT COUNT(*) AS moduleCount
+      FROM module
+      WHERE lecturer = ?
+    `;
+
+    const deleteQuery = `
+      DELETE FROM lecturers
+      WHERE _id = ?
+    `;
+
+    pool.query(checkQuery, [lid])
+      .then((results) => {
+        const moduleCount = results[0].moduleCount;
+
+        if (moduleCount > 0) {
+          reject(new Error(`Cannot delete lecturer ${lid}. He/She has associated modules.`));
+        } else {
+          return coll.deleteOne({ _id: lid }); // Delete from MongoDB
+        }
+      })
+      .then(() => {
+        resolve(`Lecturer ${lid} deleted successfully`);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
 // Export functions
 module.exports = {
   getStudents,
   updateStudent,
-   addStudent,
-   getGrades
+  addStudent,
+  getGrades,
+  findAllLecturers,
+  deleteLecturer
 };
